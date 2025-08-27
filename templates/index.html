@@ -1,5 +1,239 @@
-<!doctype html>
-<html>
-  <head><meta charset="utf-8"><title>My Flask App</title></head>
-  <body><h1>Hello — running on Render!</h1></body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MLB Pitch Predictor</title>
+  <style>
+      body {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+          padding: 20px;
+          background-color: #f4f7f6;
+          color: #333;
+          max-width: 800px;
+          margin: 0 auto;
+      }
+      h1, h2 {
+          color: #1a3a5a;
+          border-bottom: 2px solid #004687;
+          padding-bottom: 10px;
+      }
+      #games-container {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+      }
+      button {
+          margin: 5px;
+          padding: 12px 18px;
+          border: none;
+          border-radius: 8px;
+          background-color: #004687;
+          color: white;
+          font-size: 1em;
+          cursor: pointer;
+          transition: background-color 0.3s, transform 0.2s;
+      }
+      button:hover {
+          background-color: #005a9e;
+          transform: translateY(-2px);
+      }
+      button.selected {
+          background-color: #d50032;
+          box-shadow: 0 0 10px rgba(213, 0, 50, 0.5);
+      }
+      #game-data {
+          margin-top: 30px;
+          background-color: #fff;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      }
+      #pitch-info {
+          font-size: 1.1em;
+      }
+      table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 20px;
+      }
+      th, td {
+          border: 1px solid #ddd;
+          padding: 12px;
+          text-align: left;
+      }
+      th {
+          background-color: #e9ecef;
+          color: #1a3a5a;
+      }
+      tr:nth-child(even) {
+          background-color: #f8f9fa;
+      }
+      .loader {
+          text-align: center;
+          font-style: italic;
+          color: #666;
+      }
+  </style>
+</head>
+<body>
+  <h1>MLB Pitch Predictor</h1>
+  <div id="live-games">
+      <h2>Live Games</h2>
+      <div id="games-container" class="loader">Loading games...</div>
+  </div>
+  <div id="game-data">
+      <h2>Game Data & Pitch Prediction</h2>
+      <div id="pitch-info">Select a live game to see pitch predictions.</div>
+  </div>
+  <script>
+      let selectedGameId = null;
+      let updateInterval = null;
+
+
+
+
+      // Function to fetch live games from Flask backend
+      async function fetchLiveGames() {
+          try {
+              const res = await fetch('/live_games');
+              const liveGames = await res.json();
+              const container = document.getElementById('games-container');
+              container.innerHTML = ''; // Clear previous buttons
+
+
+
+
+              if (liveGames.message || liveGames.length === 0) {
+                  container.innerHTML = 'No live games at the moment.';
+                  return;
+              }
+
+
+
+
+              liveGames.forEach(game => {
+                  const btn = document.createElement('button');
+                  btn.textContent = `${game.away_team} @ ${game.home_team}`;
+                  btn.dataset.gameId = game.gamePk;
+                  btn.onclick = () => selectGame(game.gamePk);
+                  container.appendChild(btn);
+              });
+          } catch (err) {
+              console.error("Error fetching live games:", err);
+              document.getElementById('games-container').textContent = 'Error loading games.';
+          }
+      }
+
+
+
+
+      // Function to handle game selection
+      function selectGame(gameId) {
+          if (selectedGameId === gameId) return; // Don't re-select the same game
+
+
+
+
+          selectedGameId = gameId;
+        
+          // Update button styles
+          document.querySelectorAll('#games-container button').forEach(btn => {
+              btn.classList.toggle('selected', btn.dataset.gameId == gameId);
+          });
+
+
+
+
+          if (updateInterval) clearInterval(updateInterval);
+        
+          document.getElementById('pitch-info').innerHTML = '<div class="loader">Fetching prediction...</div>';
+          fetchPitchData(); // Fetch immediately on selection
+          updateInterval = setInterval(fetchPitchData, 1000); // Update every 1 second
+      }
+
+
+
+
+      // Function to fetch pitch prediction from Flask backend
+      async function fetchPitchData() {
+          if (!selectedGameId) return;
+          try {
+              const res = await fetch(`/predict_pitch?game_id=${selectedGameId}`);
+              const data = await res.json();
+              const pitchInfoDiv = document.getElementById('pitch-info');
+
+
+
+
+              if (data.error) {
+                  pitchInfoDiv.textContent = data.error;
+                  if (updateInterval) clearInterval(updateInterval);
+                  return;
+              }
+
+
+
+
+              // Check if plate appearance ended
+              if (data.balls === 4 || data.strikes === 3 || data.outs === 3) {
+                  pitchInfoDiv.innerHTML = '<div class="loader">Waiting for next batter...</div>';
+                  return; // stop here
+              }
+
+
+
+
+              let html = `
+                  <p><strong>Count:</strong> ${data.balls}-${data.strikes} | <strong>Outs:</strong> ${data.outs}</p>
+                  <p><strong>Inning:</strong> ${data.inning} | <strong>Score:</strong> ${data.away_score} (Away) - ${data.home_score} (Home)</p>
+                  <p><strong>Last Pitch Thrown:</strong> ${data.last_pitch_type}</p>
+                  <p><strong>Confidence Score:</strong> ${data.confidence_score}/100<p>
+                  <h3>Next Pitch Probabilities:</h3>
+                  <table>
+                      <thead>
+                          <tr><th>Pitch Type</th><th>Probability</th></tr>
+                      </thead>
+                      <tbody>
+              `;
+
+
+
+
+              const sortedPitches = Object.entries(data.pitch_probabilities)
+                                          .sort(([,a],[,b]) => b - a);
+
+
+
+
+              for (const [pitch, prob] of sortedPitches) {
+                  html += `<tr><td>${pitch}</td><td>${prob.toFixed(2)}%</td></tr>`;
+              }
+
+
+
+
+              html += '</tbody></table>';
+              pitchInfoDiv.innerHTML = html;
+
+
+
+
+          } catch (err) {
+              console.error("Error fetching pitch data:", err);
+              document.getElementById('pitch-info').textContent = 'An error occurred while fetching the pitch prediction.';
+              if (updateInterval) clearInterval(updateInterval);
+          }
+      }
+
+
+
+
+      // Initial actions on page load
+      document.addEventListener('DOMContentLoaded', () => {
+          fetchLiveGames();
+          setInterval(fetchLiveGames, 60000); // Refresh the list of live games every minute
+      });
+  </script>
+</body>
 </html>
