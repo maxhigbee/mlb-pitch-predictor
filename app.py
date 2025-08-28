@@ -8,6 +8,9 @@ import my_functions  # your pitch functions in a separate file
 
 app = Flask(__name__)
 
+@app.route("/healthz")
+def healthz():
+    return "OK", 200
 
 def get_date():
     eastern = ZoneInfo("America/New_York")
