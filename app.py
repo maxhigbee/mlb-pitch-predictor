@@ -7,13 +7,21 @@ import my_functions  # your pitch functions in a separate file
 
 app = Flask(__name__)
 
+def get_year():
+    # Get the current date and time
+    current_date_time = datetime.now()
+
+    # Extract the year from the datetime object
+    return current_date_time.year
+
 @app.route("/healthz")
 def healthz():
     return "OK", 200
 
 @app.route('/live_games', methods=['GET'])
 def live_games():
-   schedule_url = f'https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=2025-03-01&endDate=2025-12-30'
+   current_year = str(get_year())
+   schedule_url = f'https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate={current_year}-03-01&endDate={current_year}-12-30'
    raw_data = requests.get(schedule_url)
    cleaned_data = raw_data.json()
    live_games_list = []
