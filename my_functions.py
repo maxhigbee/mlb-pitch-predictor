@@ -7,15 +7,14 @@ from zoneinfo import ZoneInfo
 # Helper function: get today's date
 # ----------------------------
 
-
 def get_date():
-    western = ZoneInfo("America/Seattle")
-    return datetime.now(western).strftime("%Y-%m-%d")
-
+    seattle = ZoneInfo("America/Seattle")
+    return datetime.now(seattle).strftime("%Y-%m-%d")
 
 # ----------------------------
 # Helper function: get pitch-by-pitch pitcher history
 # ----------------------------
+
 def get_pitcher_data(pitcher_id, start_date, end_date):
    from pybaseball import statcast_pitcher
    import io
@@ -138,11 +137,9 @@ def get_game_data(game_id):
        pitch_data = pd.DataFrame(pitch_data_dict)
        return pitch_data
 
-
    except Exception as e:
        print(f"Error in get_game_data: {e}")
        return None
-
 
 # ----------------------------
 # Main function: predict next pitch once

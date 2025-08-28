@@ -5,22 +5,15 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 import my_functions  # your pitch functions in a separate file
 
-
 app = Flask(__name__)
 
 @app.route("/healthz")
 def healthz():
     return "OK", 200
 
-def get_date():
-    western = ZoneInfo("America/Seattle")
-    return datetime.now(western).strftime("%Y-%m-%d")
-
-
 @app.route('/live_games', methods=['GET'])
 def live_games():
-   today = get_date()
-   schedule_url = f'https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate={today}&endDate={today}'
+   schedule_url = f'https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=2025-03-01&endDate=2025-12-30'
    raw_data = requests.get(schedule_url)
    cleaned_data = raw_data.json()
    live_games_list = []
