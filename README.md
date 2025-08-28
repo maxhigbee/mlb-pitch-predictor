@@ -4,7 +4,15 @@ This is a Flask web application that predicts the next pitch type in a live MLB 
 
 The app provides a list of live games and real-time next pitch predictions based on game context and pitcher history and delivers it in a clean interface. Using a KNN model, the pitcher's most similar historical game situations are identified and a probability breakdown of the next pitch type is displayed.
 
-## Key Functions:
+## Output
+
+Game State Data: Includes current count, outs, inning, score, and last pitch type.
+
+Confidence Score: Score out of 100 describing how well the model was able to match the pitcher's past game situations to the current state. Not related to the actual distribution of pitch probabilities.
+
+Next Pitch Probabilities: The model's estimated probability distribution for the next pitch type.
+
+## Key Functions
 
 `get_year()` - Returns the current year to pull live games.
 
