@@ -8,8 +8,8 @@ from zoneinfo import ZoneInfo
 # ----------------------------
 
 def get_date():
-    seattle = ZoneInfo("America/Seattle")
-    return datetime.now(seattle).strftime("%Y-%m-%d")
+    los_angeles_time = ZoneInfo("America/Los_Angeles")
+    return datetime.now(los_angeles_time).strftime("%Y-%m-%d")
 
 # ----------------------------
 # Helper function: get pitch-by-pitch pitcher history
