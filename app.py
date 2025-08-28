@@ -13,8 +13,8 @@ def healthz():
     return "OK", 200
 
 def get_date():
-    eastern = ZoneInfo("America/New_York")
-    return datetime.now(eastern).strftime("%Y-%m-%d")
+    western = ZoneInfo("America/Seattle")
+    return datetime.now(western).strftime("%Y-%m-%d")
 
 
 @app.route('/live_games', methods=['GET'])
