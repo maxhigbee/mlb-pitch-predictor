@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import requests
 import pandas as pd
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 import my_functions  # your pitch functions in a separate file
 
 
@@ -9,7 +10,8 @@ app = Flask(__name__)
 
 
 def get_date():
-   return datetime.now().strftime("%Y-%m-%d")
+    eastern = ZoneInfo("America/New_York")
+    return datetime.now(eastern).strftime("%Y-%m-%d")
 
 
 @app.route('/live_games', methods=['GET'])
