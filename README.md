@@ -6,7 +6,9 @@ The app provides a list of live games and real-time next pitch predictions based
 
 ## Key Functions:
 
-`get_date()` – Returns today’s date in Eastern Time for schedule and historical data queries.
+`get_year()` - Returns the current year to pull live games.
+
+`get_date()` – Returns today’s date in Pacific Time for pitcher historical data queries.
 
 `live_games()` – Flask route /live_games returning all in-progress MLB games in JSON format.
 
