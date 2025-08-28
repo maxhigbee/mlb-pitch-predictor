@@ -24,8 +24,10 @@ The app provides a list of live games and real-time next pitch predictions based
 
 ## Credit
 
-Live pitch-by-pitch data was pulled from the MLB API using the following endpoint:
+Live pitch-by-pitch data and scheduling data was pulled from the MLB API using the following endpoints:
 
 https://statsapi.mlb.com/api/v1.1/game/{game_id}/feed/live/diffPatch
+
+https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate={year}-03-01&endDate={year}-12-30
 
 The [pybaseball](https://github.com/jldbc/pybaseball) package was also used for fetching historical pitcher data.
