@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
 from datetime import datetime, timedelta
-
+from zoneinfo import ZoneInfo
 
 # ----------------------------
 # Helper function: get today's date
@@ -9,7 +9,8 @@ from datetime import datetime, timedelta
 
 
 def get_date():
-   return datetime.now().strftime("%Y-%m-%d")
+    western = ZoneInfo("America/Seattle")
+    return datetime.now(western).strftime("%Y-%m-%d")
 
 
 # ----------------------------
